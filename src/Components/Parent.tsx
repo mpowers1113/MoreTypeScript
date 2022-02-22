@@ -7,7 +7,7 @@ export const Parent: FC = () => {
       <div>
         <h1>This is the parent</h1>
         <br></br>
-        <Child color={'blue'} />
+        <Child color={'blue'} onClick={() => console.log('clicked')} />
       </div>
     </div>
   );
