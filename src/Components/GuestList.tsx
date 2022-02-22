@@ -13,9 +13,7 @@ export const GuestList: FC = () => {
   return (
     <div className="border border-cyan-400 rounded-2xl mx-3.5 border-1 flex-col justify-center items-center p-5 text-center">
       <div>
-        <h1 className="text-xl mb-1 font-bold">
-          Hello this is the guest list puta
-        </h1>
+        <h1 className="text-xl mb-1 font-bold">Hello this is the guest list</h1>
         {guests.map((guest) => (
           <div key={guest}>
             <p>{guest}</p>
