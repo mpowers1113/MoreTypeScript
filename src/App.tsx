@@ -4,19 +4,12 @@ import './App.css';
 import { Parent } from './Components/Parent';
 import { GuestList } from './Components/GuestList';
 import { UserSearch } from './Components/UserSearch';
+import PokeForm from './Pokemon/PokeForm';
 
 function App() {
   return (
     <>
-      <div className="App">
-        <Parent />
-      </div>
-      <div className="mt-4">
-        <GuestList />
-      </div>
-      <div className="mt-4 flex items-center justify-center">
-        <UserSearch />
-      </div>
+      <PokeForm />
     </>
   );
 }
