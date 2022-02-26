@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 import { useTypedSelector } from '../hooks/useTypedSelector';
 import { useActions } from '../hooks/useActions';
 
-const RepositoriesList: FC = () => {
+const RepositoriesList: FC = (): JSX.Element => {
   const [term, setTerm] = useState('');
   const { searchRepositories } = useActions();
   const { data, loading, error } = useTypedSelector(

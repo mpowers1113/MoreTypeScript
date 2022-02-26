@@ -2,6 +2,7 @@ import React, { FC, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import './styles.css';
 import Spinner from './Spinner';
+import PokemonCharacteristics from './PokemonCharacteristics';
 
 interface Pokemon {
   moves: MoveProps[];
@@ -72,11 +73,10 @@ const usePokeFetch = () => {
     setLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
       const response: ServerResponseMoves = await axios.get(`${moveURL}`);
-      response.data && setCurrentMove(response.data);
+      if (response.data) setCurrentMove(response.data);
     } catch (err) {
-      const errors = err as Error | AxiosError;
+      const errors = err as AxiosError;
       setError(errors.message);
     } finally {
       setLoading(false);
@@ -89,18 +89,19 @@ const usePokeFetch = () => {
     setLoading(true);
 
     const pokeStringOrNumber = Number(pokemon) ? Number(pokemon) : pokemon;
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
       const response: ServerResponsePoke = await axios.get(
         `https://pokeapi.co/api/v2/pokemon/${pokeStringOrNumber}`,
       );
-      response.data && setPokemon(response.data);
+      if (response.data) setPokemon(response.data);
     } catch (err) {
-      const errors = err as Error | AxiosError;
-      errors &&
+      const errors = err as AxiosError;
+      if (errors.response?.status === 404)
         setError(
           `We couldn't find any pokemon that match "${pokeStringOrNumber}" 😩`,
         );
+      else setError(errors.message);
     } finally {
       setLoading(false);
     }
@@ -181,6 +182,7 @@ const PokemonDetails: FC<Pokemon> = (props): JSX.Element => {
             <span className="font-bold">Weight:</span>
             <span className="ml-1">{props.weight}</span>
           </div>
+          <PokemonCharacteristics {...props} />
         </div>
       </div>
       <div className="mt-6 md:mt-0 md:w-1/2">
@@ -269,22 +271,3 @@ const PokeForm: FC = (): JSX.Element => {
 };
 
 export default PokeForm;
-
-const truths: boolean[] = [true, false, true];
-
-//Classes
-
-class Car {
-  vroom(): void {
-    console.log('vroom');
-  }
-}
-
-let car: Car = new Car();
-
-console.log(car.vroom());
-
-let point: { x: number; y: number } = {
-  x: 10,
-  y: 20,
-};
