@@ -2,78 +2,31 @@ import React, { FC, useState } from 'react';
 import axios, { AxiosError } from 'axios';
 import './styles.css';
 import Spinner from './Spinner';
+import * as Interface from './interfaces';
 import PokemonCharacteristics from './PokemonCharacteristics';
 
-interface Pokemon {
-  moves: MoveProps[];
-  sprites: {
-    front_default: string;
-  };
-  id: number;
-  name: string;
-  weight: number;
-}
-
-interface MoveNames {
-  attack: MoveProps;
-  name: string;
-  url: string;
-}
-
-interface MoveEffect {
-  [index: number]: { effect: string };
-}
-
-interface MoveProps {
-  effect_entries: MoveEffect;
-  move: MoveNames;
-}
-
-interface IStatePokeFetch {
-  loading: boolean;
-  error: boolean | string;
-  setPokemon: React.SetStateAction<ServerResponsePoke>;
-  pokemon: null | Pokemon;
-  fetchpokemon: () => Promise<ServerResponsePoke>;
-}
-
-interface ServerResponsePoke {
-  data: Pokemon;
-  err: {
-    message: string;
-    response: {
-      status: number;
-    };
-  };
-}
-
-interface ServerResponseMoves {
-  data: MoveProps;
-  err: {
-    message: string;
-    response: {
-      status: number;
-    };
-  };
-}
-
 const usePokeFetch = () => {
-  const [loading, setLoading] = useState<IStatePokeFetch['loading']>(false);
-  const [error, setError] = useState<IStatePokeFetch['error'] | false>(false);
-  const [pokemon, setPokemon] = useState<ServerResponsePoke['data'] | null>(
-    null,
-  );
+  const [loading, setLoading] =
+    useState<Interface.IStatePokeFetch['loading']>(false);
+  const [error, setError] = useState<
+    Interface.IStatePokeFetch['error'] | false
+  >(false);
+  const [pokemon, setPokemon] = useState<
+    Interface.ServerResponsePoke['data'] | null
+  >(null);
   const [currentMove, setCurrentMove] = useState<
-    ServerResponseMoves['data'] | null
+    Interface.ServerResponseMoves['data'] | null
   >(null);
 
-  async function fetchMove(moveURL: MoveProps['move']['url']) {
+  async function fetchMove(moveURL: Interface.MoveProps['move']['url']) {
     if (loading) return;
     if (error) setError(false);
     setLoading(true);
 
     try {
-      const response: ServerResponseMoves = await axios.get(`${moveURL}`);
+      const response: Interface.ServerResponseMoves = await axios.get(
+        `${moveURL}`,
+      );
       if (response.data) setCurrentMove(response.data);
     } catch (err) {
       const errors = err as AxiosError;
@@ -83,7 +36,7 @@ const usePokeFetch = () => {
     }
   }
 
-  async function fetchPokemon(pokemon: Pokemon['name']) {
+  async function fetchPokemon(pokemon: Interface.Pokemon['name']) {
     if (loading) return;
     if (error) setError(false);
     setLoading(true);
@@ -91,7 +44,7 @@ const usePokeFetch = () => {
     const pokeStringOrNumber = Number(pokemon) ? Number(pokemon) : pokemon;
 
     try {
-      const response: ServerResponsePoke = await axios.get(
+      const response: Interface.ServerResponsePoke = await axios.get(
         `https://pokeapi.co/api/v2/pokemon/${pokeStringOrNumber}`,
       );
       if (response.data) setPokemon(response.data);
@@ -117,7 +70,7 @@ const usePokeFetch = () => {
   };
 };
 
-const PokeMove: FC<MoveProps['effect_entries'][0]> = ({
+const PokeMove: FC<Interface.MoveProps['effect_entries'][0]> = ({
   effect,
 }): JSX.Element => {
   return (
@@ -127,7 +80,11 @@ const PokeMove: FC<MoveProps['effect_entries'][0]> = ({
   );
 };
 
-const PokemonDetails: FC<Pokemon> = (props): JSX.Element => {
+const PokemonDetails: FC<Interface.PokeDetailsProps> = ({
+  submitPokemonHandler,
+  pokemon,
+}): JSX.Element => {
+  console.log('from poke details', pokemon);
   const [selectedMove, setSelectedMove] = useState<{
     name: string;
     url: string;
@@ -168,21 +125,25 @@ const PokemonDetails: FC<Pokemon> = (props): JSX.Element => {
 
   return (
     <div className="flex flex-col space-between w-full md:flex-row mx-auto mb-6">
-      <div className="mx-auto">
+      <div className="mx-auto md:w-1/2">
         <h1 className="text-center font-bold text-2xl uppercase">
-          {props.name}
+          {pokemon.name}
         </h1>
         <div className="mx-auto p-2 border border-1-gray400 rounded-lg shadow-md shadow-cyan-200/50 mt-4">
           <img
-            src={props.sprites.front_default}
-            alt={props.name}
+            src={pokemon.sprites.front_default}
+            alt={pokemon.name}
             className="mx-auto hover:scale-150 ease-in-out duration-1000"
           />
           <div className="text-center">
             <span className="font-bold">Weight:</span>
-            <span className="ml-1">{props.weight}</span>
+            <span className="ml-1">{pokemon.weight}</span>
+            <PokemonCharacteristics
+              submitPokemonHandler={submitPokemonHandler}
+              type={pokemon.types}
+              abilities={pokemon.abilities}
+            />
           </div>
-          <PokemonCharacteristics {...props} />
         </div>
       </div>
       <div className="mt-6 md:mt-0 md:w-1/2">
@@ -197,7 +158,7 @@ const PokemonDetails: FC<Pokemon> = (props): JSX.Element => {
           <PokeMove effect={currentMove.effect_entries[0].effect} />
         )}
         <div className="flex flex-wrap gap-4 p-4 mx-4">
-          {props.moves.map((attack) => (
+          {pokemon.moves.map((attack) => (
             <div
               key={attack.move.url.length + attack.move.url}
               className="move-container border cursor-pointer border-1-gray-200 rounded-lg shadow-md shadow-cyan-200/50 text-center hover:scale-110 ease-in-out duration-500">
@@ -216,7 +177,7 @@ const PokemonDetails: FC<Pokemon> = (props): JSX.Element => {
 };
 
 const PokeForm: FC = (): JSX.Element => {
-  const [pokemonName, setPokemonName] = useState<Pokemon['name']>('');
+  const [pokemonName, setPokemonName] = useState<Interface.Pokemon['name']>('');
   const { pokemon, loading, error, fetchPokemon } = usePokeFetch();
 
   const searchPokemonHandler = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -227,6 +188,11 @@ const PokeForm: FC = (): JSX.Element => {
     }
     fetchPokemon(pokemonName);
     setPokemonName('');
+  };
+
+  const submitPokemonHandler = (name: string) => {
+    if (pokemonName === name) return;
+    fetchPokemon(name);
   };
 
   return (
@@ -264,7 +230,10 @@ const PokeForm: FC = (): JSX.Element => {
       ) : loading ? (
         <Spinner />
       ) : !pokemon ? null : (
-        <PokemonDetails {...pokemon} />
+        <PokemonDetails
+          pokemon={pokemon}
+          submitPokemonHandler={submitPokemonHandler}
+        />
       )}
     </>
   );
