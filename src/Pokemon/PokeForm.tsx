@@ -81,6 +81,8 @@ const PokeMove: FC<Interface.MoveProps['effect_entries'][0]> = ({
 };
 
 const PokemonDetails: FC<Interface.PokeDetailsProps> = ({
+  setCurrentPokeHand,
+  currentPokeHand,
   submitPokemonHandler,
   pokemon,
 }): JSX.Element => {
@@ -123,13 +125,33 @@ const PokemonDetails: FC<Interface.PokeDetailsProps> = ({
     setSelectedMove({ name: targetMoveName, url: targetURL });
   };
 
+  const liftPokemonToHandHandler = () => {
+    const currentPokeNames = currentPokeHand.map((poke) => poke.name);
+    if (currentPokeNames.includes(pokemon.name)) return;
+    setCurrentPokeHand([...currentPokeHand, pokemon]);
+  };
+
+  const pokemonCumulativeScore = pokemon.stats
+    .map((poke) => poke.base_stat)
+    .reduce((acc, curr) => acc + curr, 0);
+
   return (
     <div className="flex flex-col space-between w-full md:flex-row mx-auto mb-6">
       <div className="mx-auto md:w-1/2">
-        <h1 className="text-center font-bold text-2xl uppercase">
-          {pokemon.name}
-        </h1>
         <div className="mx-auto p-2 border border-1-gray400 rounded-lg shadow-md shadow-cyan-200/50 mt-4">
+          <h1 className="text-center font-bold text-2xl uppercase">
+            {pokemon.name}
+          </h1>
+          <h1 className="text-center font-bold text-2xl uppercase text-red-600">
+            {(pokemonCumulativeScore / pokemon.stats.length).toFixed(2)}
+          </h1>
+          <div className="mx-auto text-center">
+            <button
+              onClick={liftPokemonToHandHandler}
+              className="uppercase mb-4 mt-4 py-2 px-4 bg-rose-500 border border-1-gray-200 hover:bg-rose-800 rounded-xl text-white shadow-lg shadow-rose-200/50">
+              Choose!
+            </button>
+          </div>
           <img
             src={pokemon.sprites.front_default}
             alt={pokemon.name}
@@ -176,7 +198,10 @@ const PokemonDetails: FC<Interface.PokeDetailsProps> = ({
   );
 };
 
-const PokeForm: FC = (): JSX.Element => {
+const PokeForm: FC<Interface.PokeHandState> = ({
+  setCurrentPokeHand,
+  currentPokeHand,
+}): JSX.Element => {
   const [pokemonName, setPokemonName] = useState<Interface.Pokemon['name']>('');
   const { pokemon, loading, error, fetchPokemon } = usePokeFetch();
 
@@ -233,6 +258,8 @@ const PokeForm: FC = (): JSX.Element => {
         <PokemonDetails
           pokemon={pokemon}
           submitPokemonHandler={submitPokemonHandler}
+          setCurrentPokeHand={setCurrentPokeHand}
+          currentPokeHand={currentPokeHand}
         />
       )}
     </>
