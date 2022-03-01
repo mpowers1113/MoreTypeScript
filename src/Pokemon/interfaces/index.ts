@@ -8,11 +8,31 @@ export interface Pokemon {
   weight: number;
   abilities: PokemonCharProps['abilities'];
   types: PokemonCharProps['type'];
+  stats: StatDetails[]
 }
 
+export interface PokeHandState {
+  setCurrentPokeHand: React.Dispatch<React.SetStateAction<Pokemon[] | []>>
+  currentPokeHand: Pokemon[] | []
+}
+
+export interface StatDetails {
+  base_stat: number,
+  effort: number,
+  stat: {
+    name: string,
+    url: string
+  }
+}
+
+export interface PokeHandArr {
+  pokemon: Pokemon [] | []
+}
 export interface PokeDetailsProps {
   pokemon: Pokemon;
   submitPokemonHandler: (name: string) => void;
+  setCurrentPokeHand: PokeHandState['setCurrentPokeHand'];
+  currentPokeHand: PokeHandState['currentPokeHand'];
 }
 export interface MoveNames {
   attack: MoveProps;
